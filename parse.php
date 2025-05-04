@@ -1,6 +1,6 @@
 <?php namespace WPScrape;
 
-error_reporting(0);
+error_reporting( E_ALL & ~E_NOTICE & ~E_USER_NOTICE & ~E_WARNING );
 
 // /Users/tiffany/wordpress-scrape-new/6.8/image_size_names_choose.html
 // /Users/tiffany/wordpress-scrape-new/6.8/_admin_menu.html
@@ -32,24 +32,15 @@ $data = [
   'hooks' => []
 ];
 
-if ($handle = opendir('./6.8')):
+#$files = dirname(__FILE__) . DIRECTORY_SEPARATOR . sprintf('pages_%s', Constants::VERSION);
+$files = new \DirectoryIterator( sprintf('.%s%s', DIRECTORY_SEPARATOR, Conf::WP_VERSION) );
 
-  while (false !== ($entry = readdir($handle))):
+
+// Filenames should be numeric. e.g. 1.html, not index.html
+while( $files->valid() ):
   
-    if(strpos($entry, '.') === false) continue;
-
-    $path = sprintf(
-      '.%1$s%2$s%1$s%3$s',
-      DIRECTORY_SEPARATOR,
-      Conf::WP_VERSION,
-      $entry
-    );
-
-    $hook = [];
-
-    if(strpos($entry, '.') !== false):
-      $scrape = new Scrape($path);        
-
+  if( !$files->isDot() && $files->isReadable() ):
+      $scrape = new Scrape( $files->getRealPath() );        
       $hook['name'] = $scrape->get_hook();
       $hook['url']  = sprintf(Conf::HOOKS_URL_BASE, $hook['name']);
       $hook['type'] = $scrape->is_action() ? 'action' : 'filter';
@@ -59,23 +50,24 @@ if ($handle = opendir('./6.8')):
       $hook['source'] = $scrape->get_source_location();
       $hook['category'] = $scrape->get_category();
       $hook['version'] = $scrape->get_version();
-    endif;
-      
-      $data['hooks'][] = $hook;
-  endwhile;
-endif;
+  endif;
+  
+  $data['hooks'][$files->key()] = $hook;
+  
+  $files->next();
+endwhile;
 
+/* Remove empty entries if there are any */
 $data['hooks'] = array_filter(
   $data['hooks'],
   function($item) {
-    return $item['name'] !== '';
+    return $item['name'] !== '' ;
   }
 );
 
 $data['hooks'] = array_values($data['hooks']);
 
 $fh = fopen('./wordpress-hooks.json', 'w');
-
 
 if($fh) {
   fwrite(
