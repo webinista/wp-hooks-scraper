@@ -1,5 +1,6 @@
 <?php namespace WPScrape;
 
+error_reporting(0);
 
 // /Users/tiffany/wordpress-scrape-new/6.8/image_size_names_choose.html
 // /Users/tiffany/wordpress-scrape-new/6.8/_admin_menu.html
@@ -23,39 +24,50 @@ spl_autoload_register(function ($class_name) {
     endif;
 });
 
-$file = '_admin_menu.html';
+$data = [];
 
-$path = sprintf(
-  '.%1$s%2$s%1$s%3$s',
-  DIRECTORY_SEPARATOR,
-  Conf::WP_VERSION,
-  $file
-);
+if ($handle = opendir('./6.8')):
 
-$scrape = new Scrape($path);
+  while (false !== ($entry = readdir($handle))):
+  
+    if(strpos($entry, '.') === false) continue;
 
-/* 
-{
-  "name": "the_password_form",
-  "url": "https:\/\/developer.wordpress.org\/reference\/hooks\/the_password_form\/",
-  "type": "filter",
-  "deprecated": false,
-  "description": "Filters the HTML output for the protected post password form.",
-  "source": "wp-includes\/post-template.php:1830",
-  "category": "post-template",
-  "version": "2.7.0"
-} */
-        
-        
-$hook['name'] = $scrape->get_hook();
-$hook['url']  = sprintf(Conf::HOOKS_URL_BASE, $hook['name']);
-$hook['type'] = $scrape->is_action() ? 'action' : 'filter';
-$hook['deprecated'] = $scrape->is_deprecated();
-$hook['internal'] = $scrape->is_internal();
-$hook['description'] = $scrape->get_description();
-$hook['source'] = $scrape->get_source_location();
+    $path = sprintf(
+      '.%1$s%2$s%1$s%3$s',
+      DIRECTORY_SEPARATOR,
+      Conf::WP_VERSION,
+      $entry
+    );
 
+    $hook = [];
 
-print_r( json_encode($hook, JSON_PRETTY_PRINT) );
+    if(strpos($entry, '.') !== false):
+      $scrape = new Scrape($path);        
 
-# HOOKS_URL_BASE
+      $hook['name'] = $scrape->get_hook();
+      $hook['url']  = sprintf(Conf::HOOKS_URL_BASE, $hook['name']);
+      $hook['type'] = $scrape->is_action() ? 'action' : 'filter';
+      $hook['deprecated'] = $scrape->is_deprecated();
+      $hook['internal'] = $scrape->is_internal();
+      $hook['description'] = $scrape->get_description();
+      $hook['source'] = $scrape->get_source_location();
+      $hook['category'] = $scrape->get_category();
+      $hook['version'] = $scrape->get_version();
+    endif;
+      
+      $data[] = $hook;
+  endwhile;
+  
+endif;
+
+$fh = fopen('wordpress-hooks.json', 'w+');
+
+if($fh) {
+  fwrite(
+    $fh,
+    json_encode($data)
+  );
+  
+  fclose($fh);
+}
+
