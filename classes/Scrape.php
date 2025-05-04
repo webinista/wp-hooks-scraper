@@ -38,7 +38,7 @@ final class Scrape {
     if($description) {
       $value = trim($description->textContent);
     }
-    return $value;
+    return strval($value);
   }
 
   public function get_source_location():string {
