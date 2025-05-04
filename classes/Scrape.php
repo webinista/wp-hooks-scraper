@@ -84,7 +84,7 @@ final class Scrape {
     if($change_log) {
       $value = $change_log->textContent;
     }
-    return $value;
+    return trim($value);
   }
   
   public function is_action():bool {
@@ -116,7 +116,7 @@ final class Scrape {
       $deprecated = $msg->querySelectorAll('.wp-block-wporg-code-reference-deprecated');
       $value = boolval($deprecated->length);      
     }
-    
+
     return $value;
   }
   

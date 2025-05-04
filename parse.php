@@ -32,7 +32,6 @@ $data = [
   'hooks' => []
 ];
 
-#$files = dirname(__FILE__) . DIRECTORY_SEPARATOR . sprintf('pages_%s', Constants::VERSION);
 $files = new \DirectoryIterator( sprintf('.%s%s', DIRECTORY_SEPARATOR, Conf::WP_VERSION) );
 
 
