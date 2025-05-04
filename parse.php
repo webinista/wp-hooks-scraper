@@ -74,7 +74,8 @@ $data['hooks'] = array_filter(
 
 $data['hooks'] = array_values($data['hooks']);
 
-$fh = fopen('wordpress-hooks.json', 'w+');
+$fh = fopen('./wordpress-hooks.json', 'w');
+
 
 if($fh) {
   fwrite(

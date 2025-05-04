@@ -104,9 +104,9 @@ final class Scrape {
     $value = false;
     
     $msg = $this->document->body;
-    if($msg) {
-      $msg->querySelectorAll('.wp-block-wporg-code-reference-deprecated');
-      $value = property_exists($msg, 'length') ? boolval($msg->length) : false;
+    if( $msg ) {
+      $deprecated = $msg->querySelectorAll('.wp-block-wporg-code-reference-deprecated');
+      $value = boolval($deprecated->length);      
     }
     
     return $value;
