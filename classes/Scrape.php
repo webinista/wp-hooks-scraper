@@ -124,4 +124,11 @@ final class Scrape {
     $msg = $this->document->body->querySelectorAll('.wp-block-wporg-code-reference-private-access');
     return boolval($msg->length);
   }
+  
+  public function hook_url($hook): string {
+    return sprintf(
+      Conf::HOOKS_URL_BASE,
+      preg_replace('/[\$\{\}]/', '', $hook)
+    );
+  }
 }

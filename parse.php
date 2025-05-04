@@ -42,7 +42,7 @@ while( $files->valid() ):
       $scrape = new Scrape( $files->getRealPath() );
  
       $hook['name'] = $scrape->get_hook();
-      $hook['url']  = sprintf(Conf::HOOKS_URL_BASE, $hook['name']);
+      $hook['url']  = $scrape->hook_url($hook['name']);
       $hook['type'] = $scrape->is_action() ? 'action' : 'filter';
       $hook['deprecated'] = $scrape->is_deprecated();
       $hook['internal'] = $scrape->is_internal();
