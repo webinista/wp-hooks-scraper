@@ -24,7 +24,13 @@ spl_autoload_register(function ($class_name) {
     endif;
 });
 
-$data = [];
+$Updated = new \DateTimeImmutable();
+
+$data = [
+  'version' => Conf::WP_VERSION,
+  'last_updated' => $Updated->format("j F Y"),
+  'hooks' => []
+];
 
 if ($handle = opendir('./6.8')):
 
@@ -55,10 +61,18 @@ if ($handle = opendir('./6.8')):
       $hook['version'] = $scrape->get_version();
     endif;
       
-      $data[] = $hook;
+      $data['hooks'][] = $hook;
   endwhile;
-  
 endif;
+
+$data['hooks'] = array_filter(
+  $data['hooks'],
+  function($item) {
+    return $item['name'] !== '';
+  }
+);
+
+$data['hooks'] = array_values($data['hooks']);
 
 $fh = fopen('wordpress-hooks.json', 'w+');
 
