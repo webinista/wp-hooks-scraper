@@ -11,6 +11,14 @@ final class Scrape {
     $this->document = \Dom\HTMLDocument::createFromFile($file_path);
   }
   
+  public static function sort_alpha($objet): array {
+    usort($objet, function($a, $b) {
+      return strnatcmp($a['name'], $b['name']);
+    });
+    
+    return $objet;
+  }
+
   public function get_hook():string {
     $hook_text = '';
     
