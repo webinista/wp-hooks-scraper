@@ -12,18 +12,18 @@ final class Scrape {
     $this->document = \Dom\HTMLDocument::createFromFile($file_path);
   }
   
-  public function get_hook() {
+  public function get_hook():string {
     return $this->document->querySelector('.is-current-page')->textContent;
   }
   
-  public function get_description() {
+  public function get_description():string {
     $body = $this->document->body;
     $description = $body->querySelector('.wp-block-wporg-code-reference-summary');
     
     return trim($description->textContent);
   }
 
-  public function get_source_location() {
+  public function get_source_location():string {
     $body = $this->document->body;
     $source = $body->querySelector('.wp-block-wporg-code-reference-source');
     
@@ -40,8 +40,20 @@ final class Scrape {
     return sprintf('%s:%d', $file, intval($line));
   }
   
+  public function get_category():string {
+    $category = $this->document->body
+                ->querySelector('.wporg-dot-link-list a[href*="/reference/files/"]');
+    
+    $cat_link = rtrim($category->attributes->getNamedItem('href')->value, '/');
+    return pathinfo(parse_url($cat_link, PHP_URL_PATH), PATHINFO_FILENAME);
+  }
   
-  
+  public function get_version() {
+    $change_log = $this->document->body
+                  ->querySelector('.wp-block-wporg-code-reference-changelog tbody a')
+                  ->textContent;
+    return $change_log;
+  }
   
   public function is_action() {
     $hook_func = $this->document->querySelector('.hook-func')->textContent;
