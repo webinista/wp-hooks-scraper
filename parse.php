@@ -40,7 +40,8 @@ $files = new \DirectoryIterator( sprintf('.%s%s', DIRECTORY_SEPARATOR, Conf::WP_
 while( $files->valid() ):
   
   if( !$files->isDot() && $files->isReadable() ):
-      $scrape = new Scrape( $files->getRealPath() );        
+      $scrape = new Scrape( $files->getRealPath() );
+ 
       $hook['name'] = $scrape->get_hook();
       $hook['url']  = sprintf(Conf::HOOKS_URL_BASE, $hook['name']);
       $hook['type'] = $scrape->is_action() ? 'action' : 'filter';
@@ -67,7 +68,13 @@ $data['hooks'] = array_filter(
 
 $data['hooks'] = array_values($data['hooks']);
 
-$fh = fopen('./wordpress-hooks.json', 'w');
+$data['hooks'] = array_filter($data['hooks'],
+  function($item) { return !is_null($item); }
+);
+
+$data['hooks'] = Scrape::sort_alpha($data['hooks']);
+
+$fh = fopen('/Users/tiffany/wp-hooks/static/wordpress-hooks.json', 'w');
 
 if($fh) {
   fwrite(
