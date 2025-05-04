@@ -4,73 +4,115 @@ final class Scrape {
   public \Dom\HTMLDocument $document;
 
   public function __construct( $file_path ) {
-    if( !file_exists( $file_path ) ) {
-      throw new Exception('Couldn\t open that file. Check its path and permissions');
+    if ( !file_exists( $file_path ) ) {
+      throw new \Exception('Couldn\t open that file. Check its path and permissions');
     }
-    
-    // TODO: Validate the URL first.
+
     $this->document = \Dom\HTMLDocument::createFromFile($file_path);
   }
   
   public function get_hook():string {
-    return $this->document->querySelector('.is-current-page')->textContent;
+    $hook_text = '';
+    
+    $nav = $this->document->querySelector('.is-current-page');
+    
+    if($nav) {
+      $hook_text = $nav->textContent;
+    }
+    return $hook_text;
   }
   
   public function get_description():string {
+    $value = '';
     $body = $this->document->body;
     $description = $body->querySelector('.wp-block-wporg-code-reference-summary');
     
-    return trim($description->textContent);
+    if($description) {
+      $value = trim($description->textContent);
+    }
+    return $value;
   }
 
   public function get_source_location():string {
+    $value = '';
+
     $body = $this->document->body;
     $source = $body->querySelector('.wp-block-wporg-code-reference-source');
     
-    $file_link = $source
-                 ->querySelector('.wporg-dot-link-list a[href*="/reference/files/"]');
-    $href = $file_link->attributes->getNamedItem('href')->value;
+    if ( $source ):
+      $file_link = $source
+                   ->querySelector('.wporg-dot-link-list a[href*="/reference/files/"]');
+      $href = $file_link->attributes->getNamedItem('href')->value;
+      
+      $line = $source
+              ->querySelector('.wp-block-code')
+              ->attributes->getNamedItem('data-start')->value;
+  
+      $file = str_replace('/reference/files', '', parse_url($href,  PHP_URL_PATH));
+      $value = sprintf('%s:%d', $file, intval($line));
+    endif;
     
-    $line = $source
-            ->querySelector('.wp-block-code')
-            ->attributes->getNamedItem('data-start')->value;
-
-    $file = str_replace('/reference/files', '', parse_url($href,  PHP_URL_PATH));
-    
-    return sprintf('%s:%d', $file, intval($line));
+    return $value;
   }
   
   public function get_category():string {
+    $value = '';
     $category = $this->document->body
                 ->querySelector('.wporg-dot-link-list a[href*="/reference/files/"]');
     
-    $cat_link = rtrim($category->attributes->getNamedItem('href')->value, '/');
-    return pathinfo(parse_url($cat_link, PHP_URL_PATH), PATHINFO_FILENAME);
+    if ($category):    
+      $cat_link = rtrim($category->attributes->getNamedItem('href')->value, '/');
+      $value = pathinfo(parse_url($cat_link, PHP_URL_PATH), PATHINFO_FILENAME);
+    endif;
+    
+    return $value;
   }
   
-  public function get_version() {
+  public function get_version():string {
+    $value = '';
     $change_log = $this->document->body
-                  ->querySelector('.wp-block-wporg-code-reference-changelog tbody a')
-                  ->textContent;
-    return $change_log;
+                  ->querySelector('.wp-block-wporg-code-reference-changelog tbody a');
+                  
+    if($change_log) {
+      $value = $change_log->textContent;
+    }
+    return $value;
   }
   
-  public function is_action() {
-    $hook_func = $this->document->querySelector('.hook-func')->textContent;
-    return stristr($hook_func, 'do_action') !== false;
+  public function is_action():bool {
+    $value = false;
+    
+    $hook_func = $this->document->querySelector('.hook-func');
+    if($hook_func){
+      $value = stristr($hook_func->textContent, 'do_action') !== false;
+    }
+    return $value;
   } 
 
-  public function is_filter() {
-    $hook_func = $this->document->querySelector('.hook-func')->textContent;
-    return stristr($hook_func, 'apply_filters') !== false;
+  public function is_filter():bool {
+    $value = false;
+    
+    $hook_func = $this->document->querySelector('.hook-func');
+    if($hook_func) {
+      $value = (stristr($hook_func->textContent, 'apply_filters') !== false);
+    }
+    
+    return $value;
   }
 
-  public function is_deprecated() {
-    $msg = $this->document->body->querySelectorAll('.wp-block-wporg-code-reference-deprecated');
-    return boolval($msg->length);
+  public function is_deprecated():bool {
+    $value = false;
+    
+    $msg = $this->document->body;
+    if($msg) {
+      $msg->querySelectorAll('.wp-block-wporg-code-reference-deprecated');
+      $value = property_exists($msg, 'length') ? boolval($msg->length) : false;
+    }
+    
+    return $value;
   }
   
-  public function is_internal() {
+  public function is_internal(): bool {
     $msg = $this->document->body->querySelectorAll('.wp-block-wporg-code-reference-private-access');
     return boolval($msg->length);
   }
