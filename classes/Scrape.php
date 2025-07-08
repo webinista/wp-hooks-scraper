@@ -128,7 +128,7 @@ final class Scrape {
   public function hook_url($hook): string {
     return sprintf(
       Conf::HOOKS_URL_BASE,
-      preg_replace('/[\$\{\}]/', '', $hook)
+      preg_replace('/[\$\{\}>]/', '', $hook)
     );
   }
 }
