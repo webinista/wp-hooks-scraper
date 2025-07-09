@@ -2,10 +2,6 @@
 
 error_reporting( E_ALL & ~E_NOTICE & ~E_USER_NOTICE & ~E_WARNING );
 
-// /Users/tiffany/wordpress-scrape-new/6.8/image_size_names_choose.html
-// /Users/tiffany/wordpress-scrape-new/6.8/_admin_menu.html
-// /Users/tiffany/wordpress-scrape-new/6.8/add_category_form_pre.html
-/* Autoloads other class files in this directory */
 spl_autoload_register(function ($class_name) {
     $load_dir = sprintf(
         '%1$s%2$sclasses%2$s',
@@ -34,8 +30,6 @@ $data = [
 
 $files = new \DirectoryIterator( sprintf('.%s%s', DIRECTORY_SEPARATOR, Conf::WP_VERSION) );
 
-
-// Filenames should be numeric. e.g. 1.html, not index.html
 while( $files->valid() ):
   
   if( !$files->isDot() && $files->isReadable() ):
@@ -73,12 +67,12 @@ $data['hooks'] = array_filter($data['hooks'],
 
 $data['hooks'] = Scrape::sort_alpha($data['hooks']);
 
-$fh = fopen('/Users/tiffany/wp-hooks/static/wordpress-hooks.json', 'w');
+$fh = fopen('./wordpress-hooks.json', 'w');
 
 if($fh) {
   fwrite(
     $fh,
-    json_encode($data)
+    json_encode($data, JSON_PRETTY_PRINT)
   );
   
   fclose($fh);
