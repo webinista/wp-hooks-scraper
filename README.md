@@ -5,3 +5,4 @@
 3. Run parse.php to parse the pages.
 4. Remove hooks.html and 404_template.html from the version directory.
 
+Note that this project is only mean to be useful to Webinista, Inc. The code quick-and-dirty and not intended to be reused.
