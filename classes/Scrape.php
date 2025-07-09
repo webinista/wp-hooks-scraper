@@ -5,7 +5,7 @@ final class Scrape {
 
   public function __construct( $file_path ) {
     if ( !file_exists( $file_path ) ) {
-      throw new \Exception('Couldn\t open that file. Check its path and permissions');
+      throw new \Exception('Couldn\'t open that file. Check its path and permissions');
     }
 
     $this->document = \Dom\HTMLDocument::createFromFile($file_path);
