@@ -96,12 +96,12 @@ if( count( $list ) && file_exists( CURRENT_HOOKS ) ):
   $existing = json_decode( file_get_contents( CURRENT_HOOKS ), true );
 
   $updated = array_merge_recursive( $existing['hooks'], $list );
-  $updated = Scrape::sort_alpha( $updated );
+  $existing['hooks'] = Scrape::sort_alpha( $updated );
 
   $fh = fopen( CURRENT_HOOKS, 'w' );
 
   if ( $fh ) {
-    fwrite( $fh, json_encode( $updated, JSON_PRETTY_PRINT ) );
+    fwrite( $fh, json_encode( $existing, JSON_PRETTY_PRINT ) );
     fclose( $fh );
   }
 
