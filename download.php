@@ -19,33 +19,45 @@ spl_autoload_register(function ($class_name) {
     endif;
 });
 
-
 if(!file_exists(Conf::WP_VERSION)) {
   $save_dir = mkdir(Conf::WP_VERSION);
 } else {
   $save_dir = Conf::WP_VERSION;
 }
 
-$to_download = \Dom\HTMLDocument::createFromFile('filter-reference.html');
+$source_pages = [ Conf::FILTERS_URL, Conf::ACTIONS_URL ];
 
-$doc = $to_download->documentElement;
-$article = $doc->querySelectorAll('article')->item(0);
+print_r($source_pages);
 
-$hooks = $article->querySelectorAll('article a[href*="/reference/hooks/"]');
 
-foreach($hooks as $hook):
-  $file_name = pathinfo(
-    $hook->attributes->getNamedItem('href')->value,
-    PATHINFO_FILENAME
-  );
-  
-  $cmd = sprintf(
-    'wget %1s --output-document=%2$s/%3$s.html',
-    $hook->attributes->getNamedItem('href')->value,
-    Conf::WP_VERSION,
-    rtrim($file_name,'/')
-  );
+foreach( $source_pages as $sp ):
 
-  print shell_exec( $cmd );
-  
+  # Scrape::download_file( $sp );
+
+  print Scrape::get_filename_from_url( $sp );
+
+  $to_download = \Dom\HTMLDocument::createFromFile( $sp );
+
+  $doc = $to_download->documentElement;
+  $article = $doc->querySelectorAll('article')->item(0);
+
+  $hooks = $article->querySelectorAll('article a[href*="/reference/hooks/"]');
+
+  foreach($hooks as $hook):
+    $file_name = pathinfo(
+      $hook->attributes->getNamedItem('href')->value,
+      PATHINFO_FILENAME
+    );
+    
+    $cmd = sprintf(
+      'wget %1s --output-document=%2$s/%3$s.html',
+      $hook->attributes->getNamedItem('href')->value,
+      Conf::WP_VERSION,
+      rtrim($file_name,'/')
+    );
+
+    print shell_exec( $cmd );
+    
+  endforeach;
+
 endforeach;

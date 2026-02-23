@@ -131,4 +131,26 @@ final class Scrape {
       preg_replace('/[\$\{\}>]/', '', $hook)
     );
   }
+
+  public static function get_filename_from_url($url) {
+    if( !filter_var( $url, FILTER_VALIDATE_URL) ) {
+      print 'INVALID URL';
+      throw new \Exception('Invalid URL.');
+    }
+    
+    return sprintf("%s.html", pathinfo( $url,  PATHINFO_FILENAME ));
+  }
+
+  public static function download_file( $url ): string|null {
+    $file_name = Scrape::get_filename_from_url($url);
+    
+    $tpl = sprintf(
+      "wget %s -O %s",
+      $url,
+      $file_name
+    );
+    
+    return shell_exec( $tpl );
+  }
 }
+
